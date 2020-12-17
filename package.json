@@ -1,0 +1,22 @@
+{
+  "name": "symmetrical-disco",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jprice-da15252/symmetrical-disco.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jprice-da15252/symmetrical-disco/issues"
+  },
+  "homepage": "https://github.com/jprice-da15252/symmetrical-disco#readme",
+  "dependencies": {
+    "lerna": "^3.22.1"
+  }
+}
