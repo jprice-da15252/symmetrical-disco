@@ -5,9 +5,58 @@ orbs:
   # Declare a dependency on the welcome-orb
   welcome: circleci/welcome-orb@0.4.1
 # Orchestrate or schedule a set of jobs
+
+filter-aliases:
+  filter-only-release: &filter-only-release
+    filters:
+      branches:
+        only:
+          - /^release\/.*/
+  filter-only-tagged: &filter-only-tagged
+    filters:
+      branches:
+        ignore:
+          - /.*/
+      tags:
+        only:
+          - /.*/
+
+  # Only main branches like master, develop, release*
+  filter-only-mains: &filter-only-mains
+    filters:
+      branches:
+        only:
+          - develop
+        ignore:
+          - master
+      tags:
+        only:
+          - /.*/
+  # Only main branches like master, develop, release*
+  filter-mains-and-release-branches: &filter-mains-and-release-branches
+    filters:
+      branches:
+        only:
+          - develop
+          # - master
+          - /^release\/.*/
+      tags:
+        only:
+          - /.*/
+  # Only developer-created branches like feature, bugfix branches, etc. for running tests and checks post commit
+  filter-no-releases: &filter-no-releases
+    filters:
+      branches:
+        ignore:
+          - master
+      tags:
+        ignore:
+          - /.*/
+
 workflows:
   # Name the workflow "welcome"
   welcome:
     # Run the welcome/run job in its own container
     jobs:
-      - welcome/run
+      - welcome/run:
+          <<: *filter-only-mains
