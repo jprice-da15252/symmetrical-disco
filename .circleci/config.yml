@@ -6,57 +6,37 @@ orbs:
   welcome: circleci/welcome-orb@0.4.1
 # Orchestrate or schedule a set of jobs
 
-filter-aliases:
-  filter-only-release: &filter-only-release
-    filters:
-      branches:
-        only:
-          - /^release\/.*/
-  filter-only-tagged: &filter-only-tagged
-    filters:
-      branches:
-        ignore:
-          - /.*/
-      tags:
-        only:
-          - /.*/
+environment-aliases:
+  - &env-defaults
+    AWS_PAGER: ""
 
-  # Only main branches like master, develop, release*
-  filter-only-mains: &filter-only-mains
-    filters:
-      branches:
-        only:
-          - develop
-        ignore:
-          - master
-      tags:
-        only:
-          - /.*/
-  # Only main branches like master, develop, release*
-  filter-mains-and-release-branches: &filter-mains-and-release-branches
-    filters:
-      branches:
-        only:
-          - develop
-          # - master
-          - /^release\/.*/
-      tags:
-        only:
-          - /.*/
-  # Only developer-created branches like feature, bugfix branches, etc. for running tests and checks post commit
-  filter-no-releases: &filter-no-releases
-    filters:
-      branches:
-        ignore:
-          - master
-      tags:
-        ignore:
-          - /.*/
+executors:
+  circleci-nextgen-node-10:
+    docker:
+      - image: cimg/node:10.22
+    environment: *env-defaults
+
+defaults: &defaults
+  executor: circleci-nextgen-node-10
+
+jobs:
+  script1:
+    <<: *defaults
+    steps:
+      - run:
+          name: Copy File
+          command: |
+            cp test.txt test2.txt
+  script2:
+    <<: *defaults
+    steps:
+      - run:
+          name: Read File
+          command: |
+            cat test2.txt
 
 workflows:
-  # Name the workflow "welcome"
   welcome:
-    # Run the welcome/run job in its own container
     jobs:
-      - welcome/run:
-          <<: *filter-only-mains
+      - script1
+      - script2
