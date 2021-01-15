@@ -40,4 +40,6 @@ workflows:
   welcome:
     jobs:
       - script1
-      - script2
+      - script2:
+          requires:
+            - script1
