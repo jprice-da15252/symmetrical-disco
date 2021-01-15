@@ -14,6 +14,7 @@ executors:
   circleci-nextgen-node-10:
     docker:
       - image: cimg/node:10.22
+    working_directory: /mnt/ramdisk
     environment: *env-defaults
 
 defaults: &defaults
