@@ -23,6 +23,7 @@ jobs:
   script1:
     <<: *defaults
     steps:
+      - checkout
       - run:
           name: Copy File
           command: |
