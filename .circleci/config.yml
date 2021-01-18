@@ -43,7 +43,7 @@ commands:
             tar -cvf ${custom_workspace_workdir}/workspace.tar --files-from="$includesFile"
             echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
       - persist_to_workspace:
-          root: ./
+          root: /home/circleci/custom_workspace
           paths:
             - "*"
   custom_workspace_restore:
