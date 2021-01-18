@@ -15,7 +15,8 @@ executors:
     docker:
       # - image: cimg/node:10.22
       - image: cimg/base:2020.01
-    working_directory: /mnt/ramdisk
+    # working_directory: /mnt/ramdisk
+    working_directory: /home/circleci/project
     environment: *env-defaults
 
 defaults: &defaults
@@ -70,7 +71,7 @@ jobs:
           command: |
             cp test.txt test2.txt
       - custom_workspace_save:
-          exclude: "./,*exclude*,*donot*"
+          exclude: "*exclude*,*donot*"
           paths: "./"
   script2:
     <<: *defaults
