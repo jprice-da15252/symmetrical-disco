@@ -33,14 +33,19 @@ commands:
       - run:
           name: Create tarball
           command: |
-            workdir=/home/circleci/custom_workspace
-            excludesFile=${workdir}/exclusions.txt
-            includesFile=${workdir}/inclusions.txt
+            custom_workspace_workdir=/home/circleci/custom_workspace
+            excludesFile=${custom_workspace_workdir}/exclusions.txt
+            includesFile=${custom_workspace_workdir}/inclusions.txt
 
-            mkdir "$workdir"
+            mkdir "$custom_workspace_workdir"
             printf '<< parameters.paths >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$includesFile"
             printf '<< parameters.exclude >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
-            tar -cvf ${workdir}/workspace.tar --files-from="$includesFile"
+            tar -cvf ${custom_workspace_workdir}/workspace.tar --files-from="$includesFile"
+            echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - "*"
   custom_workspace_restore:
     description: "Restore a custom workspace. must be preceded by CircleCI workspace attach"
     parameters:
@@ -48,11 +53,13 @@ commands:
         type: string
         default: "./"
     steps:
+      - attach_workspace:
+          at: /home/circleci/custom_workspace
       - run:
-          name: Add paths to PATH
+          name: Restore tarball
           command: |
-            workdir=/home/circleci/custom_workspace
-            tar -xvf ${workdir}/workspace.tar -C << parameters.at >>
+            custom_workspace_workdir=/home/circleci/custom_workspace
+            tar -xvf ${custom_workspace_workdir}/workspace.tar -C << parameters.at >>
 jobs:
   script1:
     <<: *defaults
@@ -65,15 +72,9 @@ jobs:
       - custom_workspace_save:
           exclude: "*exclude*,*donot*"
           paths: "./"
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - "*"
   script2:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: .
       - custom_workspace_restore
       - run:
           name: Read File
