@@ -21,6 +21,38 @@ executors:
 defaults: &defaults
   executor: circleci-nextgen-node-10
 
+commands:
+  custom_workspace_save:
+    description: "Must be followed by CircleCI workspace persist. Save a custom workspace tar, allowing exclusion. Exclude must be a comma separated list of quoted paths/segments to pass to tar"
+    parameters:
+      exclude:
+        type: string
+      paths:
+        type: string
+    steps:
+      - run:
+          name: Create tarball
+          command: |
+            workdir=/home/circleci/custom_workspace
+            excludesFile=${workdir}/exclusions.txt
+            includesFile=${workdir}/custom_workspace/inclusions.txt
+
+            mkdir /home/circleci/custom_workspace
+            printf '<< parameters.paths >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$includesFile"
+            printf '<< parameters.exclude >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
+            tar -cvf ${workdir}/workspace.tar --files-from="$includesFile"
+    custom_workspace_restore:
+      description: "Restore a custom workspace. must be preceded by CircleCI workspace attach"
+      parameters:
+        at:
+          type: string
+          default: "./"
+      steps:
+        - run:
+            name: Add paths to PATH
+            command: |
+              workdir=/home/circleci/custom_workspace
+              tar -xvf ${workdir}/workspace.tar -C << parameters.at >>
 jobs:
   script1:
     <<: *defaults
@@ -30,9 +62,19 @@ jobs:
           name: Copy File
           command: |
             cp test.txt test2.txt
+      - custom_workspace_save:
+          exclude: "*exclude*,*donot*"
+          paths: "./"
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - "*"
   script2:
     <<: *defaults
     steps:
+      - attach_workspace:
+          at: .
+      - custom_workspace_restore
       - run:
           name: Read File
           command: |
