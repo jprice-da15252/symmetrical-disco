@@ -41,18 +41,18 @@ commands:
             printf '<< parameters.paths >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$includesFile"
             printf '<< parameters.exclude >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
             tar -cvf ${workdir}/workspace.tar --files-from="$includesFile"
-    custom_workspace_restore:
-      description: "Restore a custom workspace. must be preceded by CircleCI workspace attach"
-      parameters:
-        at:
-          type: string
-          default: "./"
-      steps:
-        - run:
-            name: Add paths to PATH
-            command: |
-              workdir=/home/circleci/custom_workspace
-              tar -xvf ${workdir}/workspace.tar -C << parameters.at >>
+  custom_workspace_restore:
+    description: "Restore a custom workspace. must be preceded by CircleCI workspace attach"
+    parameters:
+      at:
+        type: string
+        default: "./"
+    steps:
+      - run:
+          name: Add paths to PATH
+          command: |
+            workdir=/home/circleci/custom_workspace
+            tar -xvf ${workdir}/workspace.tar -C << parameters.at >>
 jobs:
   script1:
     <<: *defaults
