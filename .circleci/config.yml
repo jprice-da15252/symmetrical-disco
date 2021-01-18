@@ -39,8 +39,8 @@ commands:
             includesFile=${custom_workspace_workdir}/inclusions.txt
 
             mkdir "$custom_workspace_workdir"
-            printf '<< parameters.paths >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$includesFile"
-            printf '<< parameters.exclude >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
+            echo \'<< parameters.paths >>\' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$includesFile"
+            echo \'<< parameters.exclude >>\' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
             echo includesFile: $(cat "$includesFile")
             echo excludesFile: $(cat "$excludesFile")
             tar -cvf ${custom_workspace_workdir}/workspace.tar --exclude-from="$excludesFile" --files-from="$includesFile"
