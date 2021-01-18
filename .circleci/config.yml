@@ -43,7 +43,7 @@ commands:
             printf '<< parameters.exclude >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
             echo includesFile: $(cat "$includesFile")
             echo excludesFile: $(cat "$excludesFile")
-            tar -cvf ${custom_workspace_workdir}/workspace.tar --exclude-from"$excludesFile" --files-from="$includesFile"
+            tar -cvf ${custom_workspace_workdir}/workspace.tar --exclude-from="$excludesFile" --files-from="$includesFile"
             echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
       - persist_to_workspace:
           root: /home/circleci/custom_workspace
