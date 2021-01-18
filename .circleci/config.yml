@@ -35,9 +35,9 @@ commands:
           command: |
             workdir=/home/circleci/custom_workspace
             excludesFile=${workdir}/exclusions.txt
-            includesFile=${workdir}/custom_workspace/inclusions.txt
+            includesFile=${workdir}/inclusions.txt
 
-            mkdir /home/circleci/custom_workspace
+            mkdir "$workdir"
             printf '<< parameters.paths >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$includesFile"
             printf '<< parameters.exclude >>' awk -F"," '{for(i=1;i<=NF;i++){print $i}}' > "$excludesFile"
             tar -cvf ${workdir}/workspace.tar --files-from="$includesFile"
