@@ -78,6 +78,10 @@ jobs:
     steps:
       - custom_workspace_restore
       - run:
+          name: List files
+          command: |
+            ls -lah
+      - run:
           name: Read File
           command: |
             cat test2.txt
