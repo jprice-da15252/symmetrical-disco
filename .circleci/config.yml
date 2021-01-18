@@ -84,7 +84,7 @@ jobs:
       - run:
           name: List files
           command: |
-            ls -lah *
+            ls -lahR *
       - run:
           name: Read File
           command: |
