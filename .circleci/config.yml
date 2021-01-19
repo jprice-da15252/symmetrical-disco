@@ -42,7 +42,7 @@ commands:
             excludesFile=${custom_workspace_workdir}/exclusions-<< parameters.tag >>.txt
             includesFile=${custom_workspace_workdir}/inclusions-<< parameters.tag >>.txt
 
-            IFS=', ' read -r -a inclusions \<<< "<< parameters.include >>"
+            IFS=', ' read -r -a inclusions \<<< "<< parameters.paths >>"
             for included in "${inclusions[@]}"; do
                 echo "Including paths:"
                 echo "$included" | tee >> "$includesFile"
