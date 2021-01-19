@@ -24,37 +24,44 @@ defaults: &defaults
 
 commands:
   custom_workspace_save:
-    description: "Must be followed by CircleCI workspace persist. Save a custom workspace tar, allowing exclusion. Exclude must be a comma separated list of quoted paths/segments to pass to tar"
+    description: "Save a custom workspace tar, allowing exclusion. Exclude must be a comma separated list of quoted paths/segments to pass to tar"
     parameters:
       exclude:
         type: string
+        default: "/dev/null"
       paths:
         type: string
+      tag:
+        type: string
+        default: "0"
     steps:
       - run:
           name: Create tarball
           command: |
             custom_workspace_workdir=/home/circleci/custom_workspace
-            excludesFile=${custom_workspace_workdir}/exclusions.txt
-            includesFile=${custom_workspace_workdir}/inclusions.txt
+            excludesFile=${custom_workspace_workdir}/exclusions-<< parameters.tag >>.txt
+            includesFile=${custom_workspace_workdir}/inclusions-<< parameters.tag >>.txt
 
-            mkdir "$custom_workspace_workdir"
-            echo '<< parameters.paths >>' | tr , '\n' > "$includesFile"
-            echo '<< parameters.exclude >>' | tr , '\n' > "$excludesFile"
-            echo includesFile: $(cat "$includesFile")
-            echo excludesFile: $(cat "$excludesFile")
-            tar -cvf ${custom_workspace_workdir}/workspace.tar --exclude-from="$excludesFile" --files-from="$includesFile"
+            mkdir -p "$custom_workspace_workdir"
+            echo '<< parameters.paths >>' | tr , "'\n'" > "$includesFile"
+            echo '<< parameters.exclude >>' | tr , "'\n'" > "$excludesFile"
+            echo Included: $(cat "$includesFile")
+            echo Excluded: $(cat "$excludesFile")
+            GZIP=--fast tar -czf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz --exclude-from="$excludesFile" --files-from="$includesFile"
             echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
       - persist_to_workspace:
           root: /home/circleci/custom_workspace
           paths:
             - "*"
   custom_workspace_restore:
-    description: "Restore a custom workspace. must be preceded by CircleCI workspace attach"
+    description: "Restore a custom workspace. Specify the directory to restore to using the at parameter"
     parameters:
       at:
         type: string
         default: "./"
+      tag:
+        type: string
+        default: "0"
     steps:
       - attach_workspace:
           at: /home/circleci/custom_workspace
@@ -62,7 +69,7 @@ commands:
           name: Restore tarball
           command: |
             custom_workspace_workdir=/home/circleci/custom_workspace
-            tar -xvf ${custom_workspace_workdir}/workspace.tar -C << parameters.at >>
+            tar -xzf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz -C << parameters.at >>
 jobs:
   script1:
     <<: *defaults
