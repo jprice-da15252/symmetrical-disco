@@ -42,18 +42,17 @@ commands:
             excludesFile=${custom_workspace_workdir}/exclusions-<< parameters.tag >>.txt
             includesFile=${custom_workspace_workdir}/inclusions-<< parameters.tag >>.txt
 
-            mkdir -p "$custom_workspace_workdir"
-            echo '<< parameters.paths >>' | tr , "'\n'" > "$includesFile"
-            echo "Include: << parameters.paths >>"
-
+            IFS=', ' read -r -a inclusions \<<< "<< parameters.include >>"
+            for included in "${inclusions[@]}"; do
+                echo "Including paths:"
+                echo "$included" | tee >> "$includesFile"
+            done
             IFS=', ' read -r -a exclusions \<<< "<< parameters.exclude >>"
             for excluded in "${exclusions[@]}"; do
-                echo "$excluded"
+                echo "Including paths:"
+                echo "$excluded" | tee >> "$excludesFile"
             done
-            echo '<< parameters.exclude >>' | tr , "'\n'" > "$excludesFile"
-            echo "Exclude: << parameters.exclude >>"
-            echo Included: $(cat "$includesFile")
-            echo Excluded: $(cat "$excludesFile")
+
             GZIP=--fast tar -czvf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz --exclude-from="$excludesFile" --files-from="$includesFile" | tee > /tmp/workspace-<< parameters.tag >>-files.txt
             echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
       - persist_to_workspace:
