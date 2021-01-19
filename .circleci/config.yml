@@ -46,7 +46,7 @@ commands:
             echo '<< parameters.paths >>' | tr , "'\n'" > "$includesFile"
             echo "Include: << parameters.paths >>"
 
-            IFS=', ' read -r -a exclusions <<< "<< parameters.exclude >>"
+            IFS=', ' read -r -a exclusions \<<< "<< parameters.exclude >>"
             for excluded in "${exclusions[@]}"; do
                 echo "$excluded"
             done
