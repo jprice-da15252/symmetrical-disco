@@ -45,14 +45,17 @@ commands:
             mkdir -p "$custom_workspace_workdir"
             IFS=', ' read -r -a inclusions \<<< "<< parameters.paths >>"
             for included in "${inclusions[@]}"; do
-                echo "Including paths:"
                 echo "$included" | tee >> "$includesFile"
             done
+                echo "Including paths:"
+                cat "$includesFile"
+
             IFS=', ' read -r -a exclusions \<<< "<< parameters.exclude >>"
             for excluded in "${exclusions[@]}"; do
-                echo "Including paths:"
                 echo "$excluded" | tee >> "$excludesFile"
             done
+                echo "Excluding paths:"
+                cat "$excludesFile" 
 
             GZIP=--fast tar -czvf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz --exclude-from="$excludesFile" --files-from="$includesFile" | tee > /tmp/workspace-<< parameters.tag >>-files.txt
             echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
