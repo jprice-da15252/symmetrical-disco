@@ -96,7 +96,7 @@ jobs:
           command: |
             cp test.txt test2.txt
       - custom_workspace_save:
-          exclude: "*exclude*,*donot*,.git"
+          exclude: "*exclude*,*donot*,./.git/*"
           paths: "./"
   script2:
     <<: *defaults
