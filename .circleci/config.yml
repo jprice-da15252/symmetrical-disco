@@ -60,9 +60,9 @@ commands:
                       GZIP=--fast tar -czvf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz --exclude-from="$excludesFile" --files-from="$includesFile" | tee > /tmp/workspace-<< parameters.tag >>-files.txt
                       echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
             - persist_to_workspace:
-                  root: /mnt/ramdisk/custom_workspace/<< parameters.tag >>
+                  root: /tmp/custom_workspace/
                   paths:
-                      - '*'
+                      - '<< parameters.tag >>'
             - store_artifacts:
                   path: /mnt/ramdisk/custom_workspace/<< parameters.tag >>/exclusions-<< parameters.tag >>.txt
             - store_artifacts:
