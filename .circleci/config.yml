@@ -2,149 +2,149 @@
 version: 2.1
 # Use a package of configuration called an orb.
 orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
+    # Declare a dependency on the welcome-orb
+    welcome: circleci/welcome-orb@0.4.1
 # Orchestrate or schedule a set of jobs
 
 environment-aliases:
-  - &env-defaults
-    AWS_PAGER: ""
+    - &env-defaults
+      AWS_PAGER: ''
 
 executors:
-  circleci-nextgen-node-10:
-    docker:
-      # - image: cimg/node:10.22
-      - image: cimg/base:2020.01
-    # working_directory: /mnt/ramdisk
-    working_directory: /home/circleci/project
-    environment: *env-defaults
+    circleci-nextgen-node-10:
+        docker:
+            # - image: cimg/node:10.22
+            - image: cimg/base:2020.01
+        # working_directory: /mnt/ramdisk
+        working_directory: /home/circleci/project
+        environment: *env-defaults
 
 defaults: &defaults
-  executor: circleci-nextgen-node-10
+    executor: circleci-nextgen-node-10
 
 commands:
-  custom_workspace_save:
-    description: "Save a custom workspace tar, allowing exclusion. Exclude must be a comma separated list of quoted paths/segments to pass to tar"
-    parameters:
-      exclude:
-        type: string
-        default: "/dev/null"
-      paths:
-        type: string
-      tag:
-        type: string
-        default: "0"
-    steps:
-      - run:
-          name: Create tarball
-          command: |
-            custom_workspace_workdir=/mnt/ramdisk/custom_workspace/<< parameters.tag >>
-            excludesFile=${custom_workspace_workdir}/exclusions-<< parameters.tag >>.txt
-            includesFile=${custom_workspace_workdir}/inclusions-<< parameters.tag >>.txt
+    custom_workspace_save:
+        description: 'Save a custom workspace tar, allowing exclusion. Exclude must be a comma separated list of quoted paths/segments to pass to tar'
+        parameters:
+            exclude:
+                type: string
+                default: '/dev/null'
+            paths:
+                type: string
+            tag:
+                type: string
+                default: '0'
+        steps:
+            - run:
+                  name: Create tarball
+                  command: |
+                      custom_workspace_workdir=/mnt/ramdisk/custom_workspace/<< parameters.tag >>
+                      excludesFile=${custom_workspace_workdir}/exclusions-<< parameters.tag >>.txt
+                      includesFile=${custom_workspace_workdir}/inclusions-<< parameters.tag >>.txt
 
-            mkdir -p "$custom_workspace_workdir"
-            IFS=', ' read -r -a inclusions \<<< "<< parameters.paths >>"
-            for included in "${inclusions[@]}"; do
-                echo "$included" | tee >> "$includesFile"
-            done
-                echo "Including paths:"
-                cat "$includesFile"
+                      mkdir -p "$custom_workspace_workdir"
+                      IFS=', ' read -r -a inclusions \<<< "<< parameters.paths >>"
+                      for included in "${inclusions[@]}"; do
+                          echo "$included" | tee >> "$includesFile"
+                      done
+                          echo "Including paths:"
+                          cat "$includesFile"
 
-            IFS=', ' read -r -a exclusions \<<< "<< parameters.exclude >>"
-            for excluded in "${exclusions[@]}"; do
-                echo "$excluded" | tee >> "$excludesFile"
-            done
-                echo "Excluding paths:"
-                cat "$excludesFile" 
+                      IFS=', ' read -r -a exclusions \<<< "<< parameters.exclude >>"
+                      for excluded in "${exclusions[@]}"; do
+                          echo "$excluded" | tee >> "$excludesFile"
+                      done
+                          echo "Excluding paths:"
+                          cat "$excludesFile" 
 
-            GZIP=--fast tar -czvf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz --exclude-from="$excludesFile" --files-from="$includesFile" | tee > /tmp/workspace-<< parameters.tag >>-files.txt
-            echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
-      - persist_to_workspace:
-          root: /mnt/ramdisk/custom_workspace
-          paths:
-            - "*"
-      - store_artifacts:
-          path: /mnt/ramdisk/custom_workspace/<< parameters.tag >>/exclusions-<< parameters.tag >>.txt
-      - store_artifacts:
-          path: /mnt/ramdisk/custom_workspace/<< parameters.tag >>/inclusions-<< parameters.tag >>.txt
-      - store_artifacts:
-          path: /tmp/workspace-<< parameters.tag >>-files.txt
-  custom_workspace_restore:
-    description: "Restore a custom workspace. Specify the directory to restore to using the at parameter"
-    parameters:
-      at:
-        type: string
-        default: "./"
-      tag:
-        type: string
-        default: "0"
-    steps:
-      - attach_workspace:
-          at: /mnt/ramdisk/custom_workspace/<< parameters.tag >>
-      - run:
-          name: Restore tarball
-          command: |
-            custom_workspace_workdir=/mnt/ramdisk/custom_workspace/<< parameters.tag >>
-            tar -xzf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz -C << parameters.at >>
+                      GZIP=--fast tar -czvf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz --exclude-from="$excludesFile" --files-from="$includesFile" | tee > /tmp/workspace-<< parameters.tag >>-files.txt
+                      echo 'export custom_workspace_workdir=$custom_workspace_workdir' >> $BASH_ENV
+            - persist_to_workspace:
+                  root: /mnt/ramdisk/custom_workspace
+                  paths:
+                      - '*'
+            - store_artifacts:
+                  path: /mnt/ramdisk/custom_workspace/<< parameters.tag >>/exclusions-<< parameters.tag >>.txt
+            - store_artifacts:
+                  path: /mnt/ramdisk/custom_workspace/<< parameters.tag >>/inclusions-<< parameters.tag >>.txt
+            - store_artifacts:
+                  path: /tmp/workspace-<< parameters.tag >>-files.txt
+    custom_workspace_restore:
+        description: 'Restore a custom workspace. Specify the directory to restore to using the at parameter'
+        parameters:
+            at:
+                type: string
+                default: './'
+            tag:
+                type: string
+                default: '0'
+        steps:
+            - attach_workspace:
+                  at: /mnt/ramdisk/custom_workspace/<< parameters.tag >>
+            - run:
+                  name: Restore tarball
+                  command: |
+                      custom_workspace_workdir=/mnt/ramdisk/custom_workspace/<< parameters.tag >>
+                      tar -xzf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz -C << parameters.at >>
 
 jobs:
-  script1:
-    <<: *defaults
-    steps:
-      - checkout
-      - run:
-          name: Copy File
-          command: |
-            cp test.txt test2.txt
-      - run:
-          name: Create test dirs
-          command: |
-            mkdir tagtest1
-            mkdir tagtest2
-            mkdir tagtest3
-            echo $(date +%s%3N) > tagtest1/test.txt 
-            echo $(date +%s%3N) > tagtest2/test.txt 
-            echo $(date +%s%3N) > tagtest3/test.txt
-      - custom_workspace_save:
-          exclude: "*exclude*,*donot*,./.git"
-          paths: "./"
-      - custom_workspace_save:
-          tag: "1"
-          paths: "./tagtest1"
-      - custom_workspace_save:
-          tag: "2"
-          paths: "./tagtest2"
-      - custom_workspace_save:
-          tag: "3"
-          paths: "./tagtest3"
-  script2:
-    <<: *defaults
-    steps:
-      - custom_workspace_restore
-      - run:
-          name: List files
-          command: |
-            ls -lahR *
-      - run:
-          name: Read File
-          command: |
-            cat test2.txt
-      - custom_workspace_restore
-      - custom_workspace_restore:
-          tag: "1"
-      - custom_workspace_restore:
-          tag: "2"
-      - custom_workspace_restore:
-          tag: "3"
-      # - run:
-      #     name: Test exclusions
-      #     command: |
-      #       if
+    script1:
+        <<: *defaults
+        steps:
+            - checkout
+            - run:
+                  name: Copy File
+                  command: |
+                      cp test.txt test2.txt
+            - run:
+                  name: Create test dirs
+                  command: |
+                      mkdir tagtest1
+                      mkdir tagtest2
+                      mkdir tagtest3
+                      echo $(date +%s%3N) > tagtest1/test.txt 
+                      echo $(date +%s%3N) > tagtest2/test.txt 
+                      echo $(date +%s%3N) > tagtest3/test.txt
+            - custom_workspace_save:
+                  exclude: '*exclude*,*donot*,./.git'
+                  paths: './'
+            - custom_workspace_save:
+                  tag: '1'
+                  paths: './tagtest1'
+            - custom_workspace_save:
+                  tag: '2'
+                  paths: './tagtest2'
+            - custom_workspace_save:
+                  tag: '3'
+                  paths: './tagtest3'
+    script2:
+        <<: *defaults
+        steps:
+            - custom_workspace_restore
+            - run:
+                  name: List files
+                  command: |
+                      ls -lahR *
+            - run:
+                  name: Read File
+                  command: |
+                      cat test2.txt
+            - custom_workspace_restore
+            - custom_workspace_restore:
+                  tag: '1'
+            - custom_workspace_restore:
+                  tag: '2'
+            - custom_workspace_restore:
+                  tag: '3'
+            # - run:
+            #     name: Test exclusions
+            #     command: |
+            #       if
 
 workflows:
-  welcome:
-    jobs:
-      - script1
-      - script2:
-          requires:
+    welcome:
+        jobs:
             - script1
+            - script2:
+                  requires:
+                      - script1
