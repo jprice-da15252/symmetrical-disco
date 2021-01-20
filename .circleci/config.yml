@@ -80,7 +80,7 @@ commands:
         default: "0"
     steps:
       - attach_workspace:
-          at: /mnt/ramdisk/custom_workspace
+          at: /mnt/ramdisk/custom_workspace/<< parameters.tag >>
       - run:
           name: Restore tarball
           command: |
