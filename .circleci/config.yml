@@ -80,7 +80,7 @@ commands:
         default: "0"
     steps:
       - attach_workspace:
-          at: /home/circleci/custom_workspace/<< parameters.tag >>
+          at: /home/circleci/custom_workspace
       - run:
           name: Restore tarball
           command: |
