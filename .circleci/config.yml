@@ -62,7 +62,7 @@ commands:
             - persist_to_workspace:
                   root: /mnt/ramdisk/custom_workspace/
                   paths:
-                      - '<< parameters.tag >>'
+                      - 'workspace-<< parameters.tag >>.tar.gz'
             - store_artifacts:
                   path: /mnt/ramdisk/custom_workspace/<< parameters.tag >>/exclusions-<< parameters.tag >>.txt
             - store_artifacts:
