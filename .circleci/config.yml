@@ -38,7 +38,7 @@ commands:
       - run:
           name: Create tarball
           command: |
-            custom_workspace_workdir=/home/circleci/custom_workspace
+            custom_workspace_workdir=/home/circleci/custom_workspace/<< parameters.tag >>
             excludesFile=${custom_workspace_workdir}/exclusions-<< parameters.tag >>.txt
             includesFile=${custom_workspace_workdir}/inclusions-<< parameters.tag >>.txt
 
@@ -64,9 +64,9 @@ commands:
           paths:
             - "*"
       - store_artifacts:
-          path: /home/circleci/custom_workspace/exclusions-<< parameters.tag >>.txt
+          path: /home/circleci/custom_workspace/<< parameters.tag >>/exclusions-<< parameters.tag >>.txt
       - store_artifacts:
-          path: /home/circleci/custom_workspace/inclusions-<< parameters.tag >>.txt
+          path: /home/circleci/custom_workspace/<< parameters.tag >>/inclusions-<< parameters.tag >>.txt
       - store_artifacts:
           path: /tmp/workspace-<< parameters.tag >>-files.txt
   custom_workspace_restore:
@@ -80,12 +80,13 @@ commands:
         default: "0"
     steps:
       - attach_workspace:
-          at: /home/circleci/custom_workspace
+          at: /home/circleci/custom_workspace/<< parameters.tag >>
       - run:
           name: Restore tarball
           command: |
-            custom_workspace_workdir=/home/circleci/custom_workspace
+            custom_workspace_workdir=/home/circleci/custom_workspace/<< parameters.tag >>
             tar -xzf ${custom_workspace_workdir}/workspace-<< parameters.tag >>.tar.gz -C << parameters.at >>
+
 jobs:
   script1:
     <<: *defaults
@@ -95,9 +96,27 @@ jobs:
           name: Copy File
           command: |
             cp test.txt test2.txt
+      - run:
+          name: Create test dirs
+          command: |
+            mkdir tagtest1
+            mkdir tagtest2
+            mkdir tagtest3
+            echo $(date +%s%3N) > tagtest1/test.txt 
+            echo $(date +%s%3N) > tagtest2/test.txt 
+            echo $(date +%s%3N) > tagtest3/test.txt
       - custom_workspace_save:
           exclude: "*exclude*,*donot*,./.git"
           paths: "./"
+      - custom_workspace_save:
+          tag: 1
+          paths: "./tagtest1"
+      - custom_workspace_save:
+          tag: 2
+          paths: "./tagtest2"
+      - custom_workspace_save:
+          tag: 3
+          paths: "./tagtest3"
   script2:
     <<: *defaults
     steps:
@@ -110,6 +129,13 @@ jobs:
           name: Read File
           command: |
             cat test2.txt
+      - custom_workspace_restore
+      - custom_workspace_restore:
+          tag: 1
+      - custom_workspace_restore:
+          tag: 2
+      - custom_workspace_restore:
+          tag: 3
       # - run:
       #     name: Test exclusions
       #     command: |
