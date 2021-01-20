@@ -109,13 +109,13 @@ jobs:
           exclude: "*exclude*,*donot*,./.git"
           paths: "./"
       - custom_workspace_save:
-          tag: 1
+          tag: "1"
           paths: "./tagtest1"
       - custom_workspace_save:
-          tag: 2
+          tag: "2"
           paths: "./tagtest2"
       - custom_workspace_save:
-          tag: 3
+          tag: "3"
           paths: "./tagtest3"
   script2:
     <<: *defaults
@@ -131,11 +131,11 @@ jobs:
             cat test2.txt
       - custom_workspace_restore
       - custom_workspace_restore:
-          tag: 1
+          tag: "1"
       - custom_workspace_restore:
-          tag: 2
+          tag: "2"
       - custom_workspace_restore:
-          tag: 3
+          tag: "3"
       # - run:
       #     name: Test exclusions
       #     command: |
